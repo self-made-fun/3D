@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GAL-B-SCALE 5510 — QR Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f5f5f5;color:#111}
+.card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 4px 18px #0002}
+h1{margin-top:0}
+label{display:block;font-weight:bold;margin:16px 0 7px}
+input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font-size:16px}
+button{width:100%;padding:14px;margin-top:14px;border:0;border-radius:9px;background:#111;color:#fff;font-size:16px;cursor:pointer}
+#qr{display:flex;justify-content:center;margin:24px auto 8px;min-height:20px}
+.note{font-size:13px;color:#666;line-height:1.5}
+.ok{font-size:13px;color:#176b2c;margin-top:10px}
+.err{font-size:13px;color:#b00020;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>GAL-B-SCALE 5510</h1>
+<p>QR code for the mobile 3D viewer.</p>
+<label for="url">Public 3D viewer URL</label>
+<input id="url" type="url" placeholder="https://YOURNAME.github.io/REPOSITORY/">
+<button id="generate">Generate QR</button>
+<div id="qr"></div>
+<button id="download" style="display:none">Download QR PNG</button>
+<div id="status"></div>
+<p class="note">The QR stores only the public HTTPS address. Scanning it opens the 3D model in the phone browser.</p>
+</div>
+<script>
+const input=document.getElementById('url');
+const qrBox=document.getElementById('qr');
+const status=document.getElementById('status');
+const download=document.getElementById('download');
+
+function generateQR(){
+  const url=input.value.trim();
+  qrBox.innerHTML='';
+  download.style.display='none';
+  status.className='';
+  status.textContent='';
+  if(!/^https:\/\//i.test(url)){
+    status.className='err';
+    status.textContent='Enter a public URL beginning with https://';
+    return;
+  }
+  if(typeof QRCode==='undefined'){
+    status.className='err';
+    status.textContent='QR library could not load. Check your internet connection and reload the page.';
+    return;
+  }
+  try{
+    new QRCode(qrBox,{text:url,width:360,height:360,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+    download.style.display='block';
+    status.className='ok';
+    status.textContent='QR code created successfully.';
+  }catch(e){
+    status.className='err';
+    status.textContent='QR generation failed: '+e.message;
+  }
+}
+document.getElementById('generate').addEventListener('click',generateQR);
+download.addEventListener('click',()=>{
+  const canvas=qrBox.querySelector('canvas');
+  const img=qrBox.querySelector('img');
+  const data=canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
+  if(!data) return;
+  const a=document.createElement('a');
+  a.download='GAL-B-SCALE-5510-QR.png';
+  a.href=data;
+  a.click();
+});
+</script>
+</body>
+</html>
